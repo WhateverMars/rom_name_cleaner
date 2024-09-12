@@ -32,8 +32,8 @@ def confirm_folder_path(folder_path):
     return confirm.lower() == "y"
 
 
-def filter_by_gameboy_extension(file_paths):
-    """Filter file paths by Gameboy extensions."""
+def filter_by_supported_extensions(file_paths):
+    """Filter file paths by listed extensions."""
     supported_rom_types = {
         ".gb",  # Game Boy
         ".gbc",  # Game Boy Color
@@ -70,29 +70,30 @@ def clean_file_name(file_path):
     return file_stem + file_ext
 
 
-def rename_file(folder_path, old_file_name, new_file_name):
+def rename_file_success(folder_path, old_file_name, new_file_name):
     """Rename the file from old_file_name to new_file_name in the specified folder."""
     old_file_path = folder_path / old_file_name
     new_file_path = folder_path / new_file_name
 
     if new_file_path.exists():
-        logging.error(f"File {new_file_name} already exists.")
+        logging.error(f"File {new_file_name} already exists. Leaving {old_file_name} unchanged.")
+        return False
     else:
         old_file_path.rename(new_file_path)
+        return True
 
 
 def rom_name_cleaner(folder_path):
     """Clean and rename ROM files in the given folder."""
 
-    file_paths = list(folder_path.iterdir())
+    file_paths = sorted(folder_path.iterdir(), key=lambda x: x.name)
 
-    # Filter the file names that end in .gb, .gbc, .gba
-    file_paths = filter_by_gameboy_extension(file_paths)
+    file_paths = filter_by_supported_extensions(file_paths)
 
     # Count the number of files renamed or skipped
     num_renamed_files = 0
 
-    # Clean file names
+    # Clean file names one by one
     for file_path in file_paths:
 
         cleaned_file_name = clean_file_name(file_path)
@@ -101,8 +102,8 @@ def rom_name_cleaner(folder_path):
         if file_name != cleaned_file_name:
 
             try:
-                rename_file(folder_path, file_name, cleaned_file_name)
-                num_renamed_files += 1
+                if rename_file_success(folder_path, file_name, cleaned_file_name):
+                    num_renamed_files += 1
             except Exception as e:
                 logging.error(f"Error renaming {file_name}: {e}")
 
