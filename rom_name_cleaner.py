@@ -1,6 +1,7 @@
 import argparse
 import logging
 from pathlib import Path
+import re
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -33,10 +34,25 @@ def confirm_folder_path(folder_path):
 
 def filter_by_gameboy_extension(file_paths):
     """Filter file paths by Gameboy extensions."""
+    supported_rom_types = {
+        ".gb",  # Game Boy
+        ".gbc",  # Game Boy Color
+        ".gba",  # Game Boy Advance
+        ".nes",  # NES
+        ".nez",  # NES
+        ".sfc",  # SNES
+        ".gen",  # Sega Genesis
+        ".n64",  # Nintendo 64
+        ".gcm",  # GameCube
+        ".gcz",  # GameCube
+        ".nds",  # Nintendo DS
+        ".3ds",  # Nintendo 3DS
+        ".nsp",  # Nintendo Switch
+        ".vpk",  # PS Vita
+        ".sav",  # Save file ext
+    }
     return [
-        file_path
-        for file_path in file_paths
-        if file_path.suffix in {".gb", ".gbc", ".gba"}
+        file_path for file_path in file_paths if file_path.suffix in supported_rom_types
     ]
 
 
@@ -45,10 +61,10 @@ def clean_file_name(file_path):
     file_stem = file_path.stem
     file_ext = file_path.suffix
 
-    bracket_index = file_stem.find("(")
-    if bracket_index != -1:
-        file_stem = file_stem[:bracket_index]
-
+    file_stem = re.sub(r"\(.*?\)", "", file_stem)
+    file_stem = re.sub(
+        r"\s+", " ", file_stem
+    )  # Replace multiple spaces with a single space
     file_stem = file_stem.strip().rstrip(".")
 
     return file_stem + file_ext
@@ -58,7 +74,11 @@ def rename_file(folder_path, old_file_name, new_file_name):
     """Rename the file from old_file_name to new_file_name in the specified folder."""
     old_file_path = folder_path / old_file_name
     new_file_path = folder_path / new_file_name
-    old_file_path.rename(new_file_path)
+
+    if new_file_path.exists():
+        logging.error(f"File {new_file_name} already exists.")
+    else:
+        old_file_path.rename(new_file_path)
 
 
 def rom_name_cleaner(folder_path):
