@@ -90,8 +90,7 @@ def rom_name_cleaner(folder_path):
 
     file_paths = filter_by_supported_extensions(file_paths)
 
-    # Count the number of files renamed or skipped
-    num_renamed_files = 0
+    renamed_files = []
 
     # Clean file names one by one
     for file_path in file_paths:
@@ -103,14 +102,16 @@ def rom_name_cleaner(folder_path):
 
             try:
                 if rename_file_success(folder_path, file_name, cleaned_file_name):
-                    num_renamed_files += 1
+                    renamed_files.append((file_name, cleaned_file_name))
             except Exception as e:
                 logging.error(f"Error renaming {file_name}: {e}")
 
-    if num_renamed_files == 0:
+    if renamed_files == []:
         logging.info("No files renamed.")
     else:
-        logging.info(f"Renamed {num_renamed_files} files.")
+        logging.info(f"Renamed {len(renamed_files)} files:")
+        for file_name, cleaned_file_name in renamed_files:
+            logging.info(f"{file_name} -> {cleaned_file_name}")
 
 
 def main():
