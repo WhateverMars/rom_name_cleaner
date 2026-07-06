@@ -1,5 +1,5 @@
 # rom_name_cleaner
-
+![CI](https://github.com/WhateverMars/rom_name_cleaner/actions/workflows/main.yml/badge.svg)
 ## Description
 This is a quick python script which I use to clean up the names of gameboy roms. This will modify the file names of rom files from the below list by removing any bracketed sections and trailing whitespaces to give a more readable name. If the new name would clash with and existing file it will leave it unchanged. This should allow for translated version to remain alongside originals.
 Also if two games would end up with the same name after running then it skips those two eg. Zelda (USA).gba, Zelda (EU).gba.
